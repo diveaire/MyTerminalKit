@@ -37,6 +37,24 @@ chmod +x install.sh
 
 Le script `install.sh` s'occupera de la configuration de Zsh, de l'installation du thème Powerlevel10k, de la police MesloLGS NF, et appliquera les configurations personnalisées fournies dans les fichiers `.zshrc` et `.p10k.zsh`.
 
+#### ColorLS :
+- Debian :
+ ```bash
+		sudo apt-get update
+		sudo apt-get install ruby-full libncurses5-dev ruby-dev build-essential libssl-dev libreadline-dev zlib1g-dev libffi-dev
+		sudo gem install colorls
+```
+- MacOS /! a tester !\:
+```bash
+		brew install rbenv
+		rbenv init
+		echo 'eval "$(rbenv init -)"' >> ~/.zshrc
+		source ~/.zshrc
+		rbenv install 3.1.0  # Remplacez 3.1.0 par la version désirée de Ruby
+		rbenv global 3.1.0
+		rbenv rehash
+```
+
 ## Personnalisation
 
 Vous pouvez modifier les fichiers de configuration selon vos besoins :
