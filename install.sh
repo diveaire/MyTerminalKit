@@ -124,7 +124,7 @@ install_required_tools() {
 
 # Installer color-ls
 install_colorls() {
-    gem install colorls
+    sudo gem install colorls
 }
 
 
