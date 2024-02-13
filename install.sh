@@ -34,6 +34,33 @@ install_zsh() {
     fi
 }
 
+# Installer Curl
+install_curl() {
+    if ! command -v curl >/dev/null 2>&1; then
+        echo "Installation de Curl..."
+        if [ "$1" = "macos" ]; then
+            brew install curl
+        elif [ "$1" = "linux" ]; then
+            sudo apt update && sudo apt install curl
+        else
+            echo "Système d'exploitation non pris en charge pour l'installation de Curl."
+            exit 1
+        fi
+    else
+        echo "Curl est déjà installé."
+    fi
+}
+
+# Installer oh-my-zsh
+install_oh-my-zsh() {
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+        echo "Installation de Oh-My-Zsh..."
+        sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    else
+        echo "Oh-My-Zsh est déjà installé."
+    fi
+}
+
 # Installer Ruby et Ruby Dev
 install_ruby() {
     if ! command -v ruby >/dev/null 2>&1; then
@@ -56,7 +83,7 @@ install_required_tools() {
     echo "Vérification et installation des outils requis..."
 
     # Liste des outils requis
-    required_tools=("unzip" "bat")
+    required_tools=("unzip" "bat" )
 
     for tool in "${required_tools[@]}"; do
         if ! command -v $tool &> /dev/null; then
@@ -90,6 +117,12 @@ install_homebrew $os
 
 # Installer Zsh
 install_zsh $os
+
+# Installer Curl
+install_curl $os
+
+# Installer OH-my-zsh
+install_oh-my-zsh
 
 # Installer Powerlevel10k
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
