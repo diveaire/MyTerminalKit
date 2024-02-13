@@ -61,6 +61,26 @@ install_oh-my-zsh() {
     fi
 }
 
+# Installer Zsh Autosuggestions
+install_zsh_autosuggestions() {
+    if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
+        echo "Installation de Zsh Autosuggestions..."
+        git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+    else
+        echo "Zsh Autosuggestions est déjà installé."
+    fi
+}
+
+# Installer Zsh Syntax Highlighting
+install_zsh_syntax_highlighting() {
+    if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
+        echo "Installation de Zsh Syntax Highlighting..."
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+    else
+        echo "Zsh Syntax Highlighting est déjà installé."
+    fi
+}
+
 # Installer Ruby et Ruby Dev
 install_ruby() {
     if ! command -v ruby >/dev/null 2>&1; then
@@ -127,6 +147,12 @@ install_oh-my-zsh
 # Installer Powerlevel10k
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
 
+# Installer Zsh Autosuggestions
+install_zsh_autosuggestions
+
+# Installer Zsh Syntax Highlighting
+install_zsh_syntax_highlighting
+
 # Installer Ruby et Ruby Dev
 install_ruby $os
 
@@ -147,5 +173,23 @@ fi
 
 # Installer la police MesloLGS NF
 install_font $os
+
+# Suppresion du dossier après installation
+echo "Voulez-vous supprimer les fichiers d'installation téléchargés ? (o/n)"
+read -r response
+
+if [[ "$response" =~ ^([oO][uU][iI]|[oO])$ ]]
+then
+    echo "Suppression des fichiers d'installation..."
+    # Supprimer le répertoire powerlevel10k si nécessaire
+    rm -rf ~/powerlevel10k
+    echo "Les fichiers d'installation ont été supprimés."
+else
+    echo "Les fichiers d'installation n'ont pas été supprimés."
+fi
+
+echo "Configuration terminée. Redémarrez votre terminal."
+
+
 
 echo "Configuration terminée. Redémarrez votre terminal."
