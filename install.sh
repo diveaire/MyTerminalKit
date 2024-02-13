@@ -106,8 +106,13 @@ install_required_tools $os
 install_colorls
 
 # Copier les fichiers de configuration
-cp path/to/your/.zshrc ~/
-cp path/to/your/.p10k.zsh ~/
+if [ "$os" = "macos" ]; then
+    cp macOs/.zshrc ~/
+    cp macOs/.p10k.zsh ~/
+else
+    cp linux/.zshrc ~/
+    cp linux/.p10k.zsh ~/
+fi
 
 # Installer la police MesloLGS NF
 install_font $os
