@@ -125,15 +125,13 @@ install_curl $os
 install_oh-my-zsh
 
 # Installer Powerlevel10k
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
-echo 'source ~/powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
 
 # Installer Ruby et Ruby Dev
 install_ruby $os
 
 # Installer les paquets de bases
 install_required_tools $os
-
 
 # Installer color-ls
 install_colorls
