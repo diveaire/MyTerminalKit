@@ -51,7 +51,30 @@ install_font() {
 
     echo "$font_name installé avec succès."
 }
+install_required_tools() {
+    echo "Vérification et installation des outils requis..."
 
+    # Liste des outils requis
+    required_tools=("fc-cache")
+
+    for tool in "${required_tools[@]}"; do
+        if ! command -v $tool &> /dev/null; then
+            echo "Installation de $tool..."
+
+            if [ "$1" = "Darwin" ]; then
+                # Installer avec Homebrew sur macOS
+                brew install $tool
+            elif [ "$1" = "Linux" ]; then
+                # Installer avec apt sur Linux
+                sudo apt-get install -y $tool
+            fi
+        else
+            echo "$tool est déjà installé."
+        fi
+    done
+}
+
+install_required_tools $os_type
 # Demander à l'utilisateur de choisir une police
 echo "Choisissez une police à installer :"
 select font_choice in "${fonts[@]}"; do

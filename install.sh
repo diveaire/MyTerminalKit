@@ -103,7 +103,7 @@ install_required_tools() {
     echo "Vérification et installation des outils requis..."
 
     # Liste des outils requis
-    required_tools=("unzip" "bat" )
+    required_tools=("unzip" "bat" "ruby-full" "libncurses5-dev" "ruby-dev" "build-essential" "libssl-dev" "libreadline-dev" "zlib1g-dev" "libffi-dev")
 
     for tool in "${required_tools[@]}"; do
         if ! command -v $tool &> /dev/null; then
