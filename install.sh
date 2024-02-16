@@ -26,7 +26,7 @@ install_zsh() {
         if [ "$1" = "macos" ]; then
             brew install zsh
         elif [ "$1" = "linux" ]; then
-            sudo apt update && sudo apt install zsh
+            sudo apt update && sudo apt install -y zsh
         else
             echo "Système d'exploitation non pris en charge."
             exit 1
@@ -41,7 +41,7 @@ install_curl() {
         if [ "$1" = "macos" ]; then
             brew install curl
         elif [ "$1" = "linux" ]; then
-            sudo apt update && sudo apt install curl
+            sudo apt update && sudo apt install -y curl
         else
             echo "Système d'exploitation non pris en charge pour l'installation de Curl."
             exit 1
@@ -55,7 +55,7 @@ install_curl() {
 install_oh-my-zsh() {
     if [ ! -d "$HOME/.oh-my-zsh" ]; then
         echo "Installation de Oh-My-Zsh..."
-        sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
     else
         echo "Oh-My-Zsh est déjà installé."
     fi
@@ -89,7 +89,7 @@ install_ruby() {
             brew install ruby
         elif [ "$1" = "linux" ]; then
             sudo apt update
-            sudo apt install ruby ruby-dev
+            sudo apt install -y ruby ruby-dev
         else
             echo "Système d'exploitation non pris en charge."
             exit 1
@@ -128,6 +128,59 @@ install_colorls() {
 }
 
 
+# ------------------------------------------------------------------------------------------------ #
+#                                          LAZYVIM                                                 #
+# ------------------------------------------------------------------------------------------------ #
+
+# Installer Neovim
+install_neovim() {
+    if ! command -v nvim >/dev/null 2>&1; then
+        echo "Installation de Neovim..."
+        if [ "$1" = "macos" ]; then
+            brew install neovim
+        elif [ "$1" = "linux" ]; then
+            sudo apt update && sudo apt install neovim -y
+        else
+            echo "Système d'exploitation non pris en charge pour l'installation de Neovim."
+            exit 1
+        fi
+    else
+        echo "Neovim est déjà installé."
+    fi
+}
+
+# Installer les dépendances pour LazyVim
+install_lazyvim_dependencies() {
+    echo "Installation des dépendances pour LazyVim..."
+    # Node.js et npm (pour certains plugins Neovim)
+    if ! command -v node >/dev/null 2>&1; then
+        if [ "$1" = "macos" ]; then
+            brew install node
+        elif [ "$1" = "linux" ]; then
+            sudo apt install nodejs npm -y
+        fi
+    fi
+
+    # Python3 et pip (pour certains plugins Neovim)
+    if ! command -v python3 >/dev/null 2>&1 || ! command -v pip3 >/dev/null 2>&1; then
+        sudo apt install python3 python3-pip -y
+    fi
+
+    # Autres dépendances peuvent être ajoutées ici
+}
+
+# Installer LazyVim
+install_lazyvim() {
+    echo "Installation de LazyVim..."
+    # Clonez LazyVim dans le répertoire de configuration de Neovim et installez-le
+    git clone --depth 1 https://github.com/LazyVim/LazyVim.git ~/.config/nvim
+    nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+}
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                                            MAIN                                                  #
+# ------------------------------------------------------------------------------------------------ #
 
 # OS principal
 os=$(detect_os)
@@ -162,7 +215,7 @@ install_required_tools $os
 # Installer color-ls
 install_colorls
 
-# Copier les fichiers de configuration
+# Copier les fichiers de configuration Terminal
 if [ "$os" = "macos" ]; then
     cp macOs/.zshrc ~/
     cp macOs/.p10k.zsh ~/
@@ -171,14 +224,21 @@ else
     cp linux/.p10k.zsh ~/
 fi
 
-# Installer la police MesloLGS NF
-install_font $os
+# Installer Neovim
+install_neovim $os
+
+# Installer les dépendances pour LazyVim
+install_lazyvim_dependencies $os
+
+# Installer LazyVim
+install_lazyvim
+
 
 # Suppresion du dossier après installation
 echo "Voulez-vous supprimer les fichiers d'installation téléchargés ? (o/n)"
 read -r response
 
-if [[ "$response" =~ ^([oO][uU][iI]|[oO])$ ]]
+if [[ "$response" =~ ^([oO][uU][iI]|[oO]|[yY]|[yY][eS][sS])$ ]]
 then
     echo "Suppression des fichiers d'installation..."
     # Supprimer le répertoire powerlevel10k si nécessaire
