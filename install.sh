@@ -215,14 +215,6 @@ install_required_tools $os
 # Installer color-ls
 install_colorls
 
-# Copier les fichiers de configuration Terminal
-if [ "$os" = "macos" ]; then
-    cp macOs/.zshrc ~/
-    cp macOs/.p10k.zsh ~/
-else
-    cp linux/.zshrc ~/
-    cp linux/.p10k.zsh ~/
-fi
 
 # Installer Neovim
 install_neovim $os
@@ -233,6 +225,14 @@ install_lazyvim_dependencies $os
 # Installer LazyVim
 install_lazyvim
 
+# Copier les fichiers de configuration Terminal
+if [ "$os" = "macos" ]; then
+    cp macOs/.zshrc ~/
+    cp macOs/.p10k.zsh ~/
+else
+    cp linux/.zshrc ~/
+    cp linux/.p10k.zsh ~/
+fi
 
 # Suppresion du dossier après installation
 echo "Voulez-vous supprimer les fichiers d'installation téléchargés ? (o/n)"

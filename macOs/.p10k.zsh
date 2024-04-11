@@ -49,7 +49,6 @@
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     # =========================[ Line #1 ]=========================
     status                  # exit code of the last command
-    battery
     command_execution_time  # duration of the last command
     background_jobs         # presence of background jobs
     direnv                  # direnv status (https://direnv.net/)
@@ -103,6 +102,9 @@
     todo                    # todo items (https://github.com/todotxt/todo.txt-cli)
     timewarrior             # timewarrior tracking status (https://timewarrior.net/)
     taskwarrior             # taskwarrior task count (https://taskwarrior.org/)
+    ip                      # ip address
+    battery                 # internal battery
+    date                    # current date
     time                    # current time
     # =========================[ Line #2 ]=========================
     newline                 # \n
@@ -113,6 +115,18 @@
     # wifi                  # wifi speed
     # example               # example user-defined segment (see prompt_example function below)
   )
+
+
+  # ----------------------------------- PERSONNAL CONFIGURATION ----------------------------------- #
+  # USER
+  POWERLEVEL9K_USER_FOREGROUND='129'  # Couleur du texte
+  # DATE
+  POWERLEVEL9K_DATE_FORMAT='%D{%d %b %Y}'
+  POWERLEVEL9K_DATE_FOREGROUND='white'
+  # IP
+  typeset -g POWERLEVEL9K_IP_VISUAL_IDENTIFIER_EXPANSION='󱦂'
+  # ----------------------------------------------------------------------------------------------- #
+
 
   # Defines character set used by powerlevel10k. It's best to let `p10k configure` set it for you.
   typeset -g POWERLEVEL9K_MODE=nerdfont-complete
@@ -1496,7 +1510,11 @@
   #   P9K_IP_TX_BYTES_DELTA | number of bytes sent since last prompt
   #   P9K_IP_RX_RATE        | receive rate (since last prompt)
   #   P9K_IP_TX_RATE        | send rate (since last prompt)
-  typeset -g POWERLEVEL9K_IP_CONTENT_EXPANSION='${P9K_IP_RX_RATE:+%70F⇣$P9K_IP_RX_RATE }${P9K_IP_TX_RATE:+%215F⇡$P9K_IP_TX_RATE }%38F$P9K_IP_IP'
+  
+  # IP WITH RATE
+  # typeset -g POWERLEVEL9K_IP_CONTENT_EXPANSION='${P9K_IP_RX_RATE:+%70F⇣$P9K_IP_RX_RATE }${P9K_IP_TX_RATE:+%215F⇡$P9K_IP_TX_RATE }%38F$P9K_IP_IP'
+  # IP CLASSIC
+  typeset -g POWERLEVEL9K_IP_CONTENT_EXPANSION='$P9K_IP_IP'
   # Show information for the first network interface whose name matches this regular expression.
   # Run `ifconfig` or `ip -4 a show` to see the names of all network interfaces.
   typeset -g POWERLEVEL9K_IP_INTERFACE='[ew].*'

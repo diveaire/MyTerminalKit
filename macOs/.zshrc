@@ -9,7 +9,7 @@ fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/Users/nicolas/.oh-my-zsh"
+export ZSH="~/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -92,8 +92,8 @@ plugins=(
 	web-search
 	copyfile
 )
-source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $ZSH/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $ZSH/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $ZSH/oh-my-zsh.sh
 
 ZSH_TMUX_AUTOSTART=false
@@ -123,15 +123,11 @@ ZSH_TMUX_AUTOSTART=false
 function copydir {
   pwd | tr -d "\r\n" | pbcopy
 }
-function IntelliJ {
-  cd /Users/nicolas/Library/Application\ Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/231.9225.16/IntelliJ\ IDEA.app/Contents/MacOS/
-  ./idea
-}
 
 # Example aliases
 alias cpf='copyfile'
 alias cpd=copydir
-alias zshconfig="mvim ~/.zshrc"
+alias zshconfig="subl ~/.zshrc"
 alias ll='colorls -l --sd --group-directories-first'
 alias ls='colorls --group-directories-first'
 alias la='colorls -a'
@@ -140,7 +136,6 @@ alias lsd='colorls -d'
 alias src='exec zsh'
 alias cls='clear'
 alias viupd='vim +PluginInstall +qall'
-alias intelliJ='IntelliJ'
 
 bindkey '^@' autosuggestions-clear
 # alias zshconfig="mate ~/.zshrc"
@@ -150,6 +145,7 @@ bindkey '^@' autosuggestions-clear
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="/usr/local/sbin:$PATH"
 eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
+
 # OPENSSL EXPORTS
 export PATH="/usr/local/opt/openssl/bin:$PATH"
 export LDFLAGS="-L/usr/local/opt/openssl/lib"
@@ -160,13 +156,4 @@ export PATH="/usr/local/opt/ruby/bin:$PATH"
 export LDFLAGS="-L/usr/local/opt/ruby/lib"
 export CPPFLAGS="-I/usr/local/opt/ruby/include"
 export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
-# GOOGLE CLOUD EXPORTS
-export GOOGLE_APPLICATION_CREDENTIALS="/Users/nicolas/ninja-lims-350520-35afbc62030e.json"
-
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/nicolas/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/nicolas/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/nicolas/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/nicolas/google-cloud-sdk/completion.zsh.inc'; fi
 
