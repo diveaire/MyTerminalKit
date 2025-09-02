@@ -103,7 +103,7 @@ install_required_tools() {
     echo "Vérification et installation des outils requis..."
 
     # Liste des outils requis
-    required_tools=("unzip" "bat" "ruby-full" "libncurses5-dev" "ruby-dev" "build-essential" "libssl-dev" "libreadline-dev" "zlib1g-dev" "libffi-dev")
+    required_tools=("build-essential" "unzip" "bat" "ruby-full" "libncurses5-dev" "ruby-dev" "libssl-dev" "libreadline-dev" "zlib1g-dev" "libffi-dev")
 
     for tool in "${required_tools[@]}"; do
         if ! command -v $tool &> /dev/null; then
@@ -220,10 +220,10 @@ install_colorls
 install_neovim $os
 
 # Installer les dépendances pour LazyVim
-install_lazyvim_dependencies $os
+#install_lazyvim_dependencies $os
 
 # Installer LazyVim
-install_lazyvim
+#install_lazyvim
 
 # Copier les fichiers de configuration Terminal
 if [ "$os" = "macos" ]; then
