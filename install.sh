@@ -1,255 +1,153 @@
 #!/bin/bash
 
-# Fonction pour détecter le système d'exploitation
-detect_os() {
-    case "$(uname -s)" in
-        Darwin) echo "macos" ;;
-        Linux) echo "linux" ;;
-        *) echo "unknown" ;;
-    esac
-}
+# ============================================================================
+#  MyTerminalKit — Interactive Terminal Setup
+# ============================================================================
+#  One script to set up a beautiful, productive terminal environment.
+#  Works on macOS and Linux (Debian/Ubuntu, Fedora, Arch, openSUSE, Alpine).
+#
+#  Usage:
+#    git clone https://github.com/diveaire/MyTerminalKit.git
+#    cd MyTerminalKit && chmod +x install.sh && ./install.sh
+# ============================================================================
 
-# Installer Homebrew sous macOS
-install_homebrew() {
-    if [ "$1" = "macos" ]; then
-        if ! command -v brew >/dev/null 2>&1; then
-            echo "Installation de Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-        fi
-    fi
-}
+set -euo pipefail
 
-# Installer Zsh
-install_zsh() {
-    if ! command -v zsh >/dev/null 2>&1; then
-        echo "Installation de Zsh..."
-        if [ "$1" = "macos" ]; then
-            brew install zsh
-        elif [ "$1" = "linux" ]; then
-            sudo apt update && sudo apt install -y zsh
-        else
-            echo "Système d'exploitation non pris en charge."
-            exit 1
-        fi
-    fi
-}
+# Resolve project root (works even when called via a symlink)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export SCRIPT_DIR
 
-# Installer Curl
-install_curl() {
-    if ! command -v curl >/dev/null 2>&1; then
-        echo "Installation de Curl..."
-        if [ "$1" = "macos" ]; then
-            brew install curl
-        elif [ "$1" = "linux" ]; then
-            sudo apt update && sudo apt install -y curl
-        else
-            echo "Système d'exploitation non pris en charge pour l'installation de Curl."
-            exit 1
-        fi
-    else
-        echo "Curl est déjà installé."
-    fi
-}
+# Source modules
+source "$SCRIPT_DIR/scripts/utils.sh"
+source "$SCRIPT_DIR/scripts/tools.sh"
+source "$SCRIPT_DIR/scripts/zsh.sh"
+source "$SCRIPT_DIR/scripts/neovim.sh"
 
-# Installer oh-my-zsh
-install_oh-my-zsh() {
-    if [ ! -d "$HOME/.oh-my-zsh" ]; then
-        echo "Installation de Oh-My-Zsh..."
-        sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
-    else
-        echo "Oh-My-Zsh est déjà installé."
-    fi
-}
+# ============================================================================
+#  Banner
+# ============================================================================
 
-# Installer Zsh Autosuggestions
-install_zsh_autosuggestions() {
-    if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
-        echo "Installation de Zsh Autosuggestions..."
-        git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-    else
-        echo "Zsh Autosuggestions est déjà installé."
-    fi
-}
+echo ""
+echo -e "${BOLD}${CYAN}"
+echo "  ╔══════════════════════════════════════════╗"
+echo "  ║        MyTerminalKit  Installer          ║"
+echo "  ║    Beautiful terminal in one command      ║"
+echo "  ╚══════════════════════════════════════════╝"
+echo -e "${NC}"
 
-# Installer Zsh Syntax Highlighting
-install_zsh_syntax_highlighting() {
-    if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
-        echo "Installation de Zsh Syntax Highlighting..."
-        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-    else
-        echo "Zsh Syntax Highlighting est déjà installé."
-    fi
-}
+# ============================================================================
+#  Environment Detection
+# ============================================================================
 
-# Installer Ruby et Ruby Dev
-install_ruby() {
-    if ! command -v ruby >/dev/null 2>&1; then
-        echo "Installation de Ruby..."
-        if [ "$1" = "macos" ]; then
-            brew install ruby
-        elif [ "$1" = "linux" ]; then
-            sudo apt update
-            sudo apt install -y ruby ruby-dev
-        else
-            echo "Système d'exploitation non pris en charge."
-            exit 1
-        fi
-    else
-        echo "Ruby est déjà installé."
-    fi
-}
+detect_os
 
-install_required_tools() {
-    echo "Vérification et installation des outils requis..."
+# ── Prerequisites ───────────────────────────────────────────────────────────
 
-    # Liste des outils requis
-    required_tools=("build-essential" "unzip" "bat" "ruby-full" "libncurses5-dev" "ruby-dev" "libssl-dev" "libreadline-dev" "zlib1g-dev" "libffi-dev")
+header "Prerequisites"
 
-    for tool in "${required_tools[@]}"; do
-        if ! command -v $tool &> /dev/null; then
-            echo "Installation de $tool..."
-
-            if [ "$1" = "Darwin" ]; then
-                # Installer avec Homebrew sur macOS
-                brew install $tool
-            elif [ "$1" = "Linux" ]; then
-                # Installer avec apt sur Linux
-                sudo apt-get install -y $tool
-            fi
-        else
-            echo "$tool est déjà installé."
-        fi
-    done
-}
-
-# Installer color-ls
-install_colorls() {
-    sudo gem install colorls
-}
-
-
-# ------------------------------------------------------------------------------------------------ #
-#                                          LAZYVIM                                                 #
-# ------------------------------------------------------------------------------------------------ #
-
-# Installer Neovim
-install_neovim() {
-    if ! command -v nvim >/dev/null 2>&1; then
-        echo "Installation de Neovim..."
-        if [ "$1" = "macos" ]; then
-            brew install neovim
-        elif [ "$1" = "linux" ]; then
-            sudo apt update && sudo apt install neovim -y
-        else
-            echo "Système d'exploitation non pris en charge pour l'installation de Neovim."
-            exit 1
-        fi
-    else
-        echo "Neovim est déjà installé."
-    fi
-}
-
-# Installer les dépendances pour LazyVim
-install_lazyvim_dependencies() {
-    echo "Installation des dépendances pour LazyVim..."
-    # Node.js et npm (pour certains plugins Neovim)
-    if ! command -v node >/dev/null 2>&1; then
-        if [ "$1" = "macos" ]; then
-            brew install node
-        elif [ "$1" = "linux" ]; then
-            sudo apt install nodejs npm -y
-        fi
-    fi
-
-    # Python3 et pip (pour certains plugins Neovim)
-    if ! command -v python3 >/dev/null 2>&1 || ! command -v pip3 >/dev/null 2>&1; then
-        sudo apt install python3 python3-pip -y
-    fi
-
-    # Autres dépendances peuvent être ajoutées ici
-}
-
-# Installer LazyVim
-install_lazyvim() {
-    echo "Installation de LazyVim..."
-    # Clonez LazyVim dans le répertoire de configuration de Neovim et installez-le
-    git clone --depth 1 https://github.com/LazyVim/LazyVim.git ~/.config/nvim
-    nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
-}
-
-
-# ------------------------------------------------------------------------------------------------ #
-#                                            MAIN                                                  #
-# ------------------------------------------------------------------------------------------------ #
-
-# OS principal
-os=$(detect_os)
-
-# Installer Homebrew (pour macOS)
-install_homebrew $os
-
-# Installer Zsh
-install_zsh $os
-
-# Installer Curl
-install_curl $os
-
-# Installer OH-my-zsh
-install_oh-my-zsh
-
-# Installer Powerlevel10k
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
-
-# Installer Zsh Autosuggestions
-install_zsh_autosuggestions
-
-# Installer Zsh Syntax Highlighting
-install_zsh_syntax_highlighting
-
-# Installer Ruby et Ruby Dev
-install_ruby $os
-
-# Installer les paquets de bases
-install_required_tools $os
-
-# Installer color-ls
-install_colorls
-
-
-# Installer Neovim
-install_neovim $os
-
-# Installer les dépendances pour LazyVim
-#install_lazyvim_dependencies $os
-
-# Installer LazyVim
-#install_lazyvim
-
-# Copier les fichiers de configuration Terminal
-if [ "$os" = "macos" ]; then
-    cp macOs/.zshrc ~/
-    cp macOs/.p10k.zsh ~/
-else
-    cp linux/.zshrc ~/
-    cp linux/.p10k.zsh ~/
+if [ "$OS_TYPE" = "macos" ]; then
+    install_homebrew
 fi
 
-# Suppresion du dossier après installation
-echo "Voulez-vous supprimer les fichiers d'installation téléchargés ? (o/n)"
-read -r response
+install_curl
+install_git
+install_unzip
+pkg_update
 
-if [[ "$response" =~ ^([oO][uU][iI]|[oO]|[yY]|[yY][eS][sS])$ ]]
-then
-    echo "Suppression des fichiers d'installation..."
-    # Supprimer le répertoire powerlevel10k si nécessaire
-    rm -rf ~/powerlevel10k
-    echo "Les fichiers d'installation ont été supprimés."
-else
-    echo "Les fichiers d'installation n'ont pas été supprimés."
+# ============================================================================
+#  Component Selection
+# ============================================================================
+
+header "What would you like to install?"
+
+INSTALL_ZSH=false
+INSTALL_OHMYZSH=false
+INSTALL_P10K=false
+INSTALL_PLUGINS=false
+INSTALL_COLORLS=false
+INSTALL_NEOVIM=false
+INSTALL_LAZYVIM=false
+INSTALL_CONFIG=false
+
+if ask_yes_no "1. Zsh shell"; then
+    INSTALL_ZSH=true
 fi
 
-echo "Configuration terminée. Redémarrez votre terminal."
+if ask_yes_no "2. Oh My Zsh framework"; then
+    INSTALL_OHMYZSH=true
+fi
 
+if [ "$INSTALL_OHMYZSH" = true ]; then
+    if ask_yes_no "   2a. Powerlevel10k theme"; then
+        INSTALL_P10K=true
+    fi
+    if ask_yes_no "   2b. Zsh plugins (autosuggestions + syntax-highlighting)"; then
+        INSTALL_PLUGINS=true
+    fi
+fi
 
+if ask_yes_no "3. colorls (Ruby-based ls with colors & icons)"; then
+    INSTALL_COLORLS=true
+fi
 
-echo "Configuration terminée. Redémarrez votre terminal."
+if ask_yes_no "4. Neovim"; then
+    INSTALL_NEOVIM=true
+fi
+
+if [ "$INSTALL_NEOVIM" = true ]; then
+    if ask_yes_no "   4a. LazyVim (full Neovim IDE layer)"; then
+        INSTALL_LAZYVIM=true
+    fi
+fi
+
+if [ "$INSTALL_OHMYZSH" = true ]; then
+    if ask_yes_no "5. Deploy MyTerminalKit .zshrc & .p10k.zsh config files"; then
+        INSTALL_CONFIG=true
+    fi
+fi
+
+# ============================================================================
+#  Installation
+# ============================================================================
+
+header "Installing selected components"
+
+if [ "$INSTALL_ZSH" = true ]; then install_zsh; fi
+if [ "$INSTALL_OHMYZSH" = true ]; then install_ohmyzsh; fi
+if [ "$INSTALL_P10K" = true ]; then install_powerlevel10k; fi
+if [ "$INSTALL_PLUGINS" = true ]; then install_zsh_plugins; fi
+if [ "$INSTALL_COLORLS" = true ]; then install_colorls; fi
+
+if [ "$INSTALL_NEOVIM" = true ]; then
+    install_neovim
+    if [ "$INSTALL_LAZYVIM" = true ]; then
+        install_lazyvim_deps
+        install_lazyvim
+    fi
+fi
+
+if [ "$INSTALL_CONFIG" = true ]; then deploy_zsh_config; fi
+if [ "$INSTALL_ZSH" = true ]; then set_default_shell_zsh; fi
+
+# ============================================================================
+#  Summary
+# ============================================================================
+
+header "Done!"
+
+echo -e "${GREEN}Installed components:${NC}"
+if [ "$INSTALL_ZSH" = true ]; then echo -e "  ${GREEN}✓${NC} Zsh"; fi
+if [ "$INSTALL_OHMYZSH" = true ]; then echo -e "  ${GREEN}✓${NC} Oh My Zsh"; fi
+if [ "$INSTALL_P10K" = true ]; then echo -e "  ${GREEN}✓${NC} Powerlevel10k"; fi
+if [ "$INSTALL_PLUGINS" = true ]; then echo -e "  ${GREEN}✓${NC} Zsh plugins (autosuggestions, syntax-highlighting)"; fi
+if [ "$INSTALL_COLORLS" = true ]; then echo -e "  ${GREEN}✓${NC} colorls"; fi
+if [ "$INSTALL_NEOVIM" = true ]; then echo -e "  ${GREEN}✓${NC} Neovim"; fi
+if [ "$INSTALL_LAZYVIM" = true ]; then echo -e "  ${GREEN}✓${NC} LazyVim"; fi
+if [ "$INSTALL_CONFIG" = true ]; then echo -e "  ${GREEN}✓${NC} Shell configuration (.zshrc + .p10k.zsh)"; fi
+
+echo ""
+info "Restart your terminal or run 'exec zsh' to apply changes."
+if [ "$INSTALL_P10K" = true ] && [ "$INSTALL_CONFIG" != true ]; then
+    info "Run 'p10k configure' to set up the Powerlevel10k prompt."
+fi
+echo ""

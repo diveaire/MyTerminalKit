@@ -1,92 +1,125 @@
 #!/bin/bash
 
-# Définir l'emplacement des polices selon l'OS
-font_dir=""
-os_type="$(uname -s)"
+# ============================================================================
+#  MyTerminalKit — Nerd Fonts Installer
+# ============================================================================
+#  Install Nerd Fonts on your LOCAL machine (the one running your terminal
+#  emulator). You do NOT need fonts on remote servers you SSH into.
+#
+#  Usage:  chmod +x installFont.sh && ./installFont.sh
+# ============================================================================
 
-case $os_type in
-    Darwin)
-        font_dir="$HOME/Library/Fonts"
-        # S'assurer que Homebrew est installé
-        if ! command -v brew >/dev/null 2>&1; then
-            echo "Homebrew n'est pas installé. Installation en cours..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/scripts/utils.sh"
+source "$SCRIPT_DIR/scripts/tools.sh"
+
+detect_os
+
+# ── Font directory ──────────────────────────────────────────────────────────
+
+FONT_DIR=""
+case "$OS_TYPE" in
+    macos)
+        FONT_DIR="$HOME/Library/Fonts"
         ;;
-    Linux)
-        font_dir="$HOME/.local/share/fonts"
-        mkdir -p $font_dir
+    linux)
+        FONT_DIR="$HOME/.local/share/fonts"
+        mkdir -p "$FONT_DIR"
         ;;
     *)
-        echo "Système d'exploitation non pris en charge."
+        error "Unsupported OS for font installation."
         exit 1
         ;;
 esac
 
-# Générer automatiquement la liste des polices à partir des fichiers ZIP dans le dossier 'fonts'
+# ── Ensure unzip is available ───────────────────────────────────────────────
+
+install_unzip
+
+# Ensure fc-cache is available on Linux
+if [ "$OS_TYPE" = "linux" ] && ! cmd_exists fc-cache; then
+    info "Installing fontconfig (provides fc-cache)..."
+    pkg_install fontconfig
+fi
+
+# ── Discover available fonts ────────────────────────────────────────────────
+
 fonts=()
-for zip in fonts/*.zip; do
-    if [ -f "$zip" ]; then
-        font_name=$(basename "$zip" .zip)
-        fonts+=("$font_name")
-    fi
+for zip in "$SCRIPT_DIR"/fonts/*.zip; do
+    [ -f "$zip" ] && fonts+=("$(basename "$zip" .zip)")
 done
 
-# Fonction pour installer une police
-install_font() {
-    font_name=$1
-    font_zip="${font_name}.zip"
+if [ ${#fonts[@]} -eq 0 ]; then
+    error "No font .zip files found in $SCRIPT_DIR/fonts/"
+    exit 1
+fi
 
-    if [ "$os_type" = "Darwin" ]; then
-        # Utiliser Homebrew pour installer la police sur macOS
-        brew tap homebrew/cask-fonts
-        brew install --cask font-$font_name
+# ── Menu ────────────────────────────────────────────────────────────────────
 
-    elif [ "$os_type" = "Linux" ]; then
-        # Décompresse le zip dans le dossier des polices pour Linux
-        unzip -o "fonts/$font_zip" -d $font_dir
-        # Recharger le cache des polices
-        fc-cache -f -v
+header "Nerd Fonts Installer"
+
+echo -e "${YELLOW}Note:${NC} Fonts are only needed on your ${BOLD}local machine${NC}"
+echo -e "      (the one running your terminal emulator).\n"
+echo -e "${BOLD}Available fonts:${NC}"
+
+for i in "${!fonts[@]}"; do
+    echo "  $((i + 1)). ${fonts[$i]}"
+done
+echo "  A. Install all"
+echo "  0. Cancel"
+echo ""
+
+read -rp "Your choice: " choice
+
+if [ "$choice" = "0" ]; then
+    info "Cancelled."
+    exit 0
+fi
+
+# ── Install function ────────────────────────────────────────────────────────
+
+do_install_font() {
+    local name="$1"
+    local zip_path="$SCRIPT_DIR/fonts/${name}.zip"
+
+    if [ ! -f "$zip_path" ]; then
+        error "File not found: $zip_path"
+        return 1
     fi
 
-    echo "$font_name installé avec succès."
+    info "Installing ${name}..."
+
+    # Extract only font files (.ttf / .otf), fall back to extracting everything
+    unzip -o "$zip_path" '*.ttf' '*.otf' -d "$FONT_DIR" 2>/dev/null \
+        || unzip -o "$zip_path" -d "$FONT_DIR" 2>/dev/null
+
+    # Rebuild font cache on Linux
+    if [ "$OS_TYPE" = "linux" ] && cmd_exists fc-cache; then
+        fc-cache -f "$FONT_DIR" 2>/dev/null
+    fi
+
+    success "${name} installed → $FONT_DIR"
 }
-install_required_tools() {
-    echo "Vérification et installation des outils requis..."
 
-    # Liste des outils requis
-    required_tools=("fc-cache")
+# ── Execute ─────────────────────────────────────────────────────────────────
 
-    for tool in "${required_tools[@]}"; do
-        if ! command -v $tool &> /dev/null; then
-            echo "Installation de $tool..."
-
-            if [ "$1" = "Darwin" ]; then
-                # Installer avec Homebrew sur macOS
-                brew install $tool
-            elif [ "$1" = "Linux" ]; then
-                # Installer avec apt sur Linux
-                sudo apt-get install -y $tool
-            fi
-        else
-            echo "$tool est déjà installé."
-        fi
+if [[ "$choice" =~ ^[aA]$ ]]; then
+    for font in "${fonts[@]}"; do
+        do_install_font "$font"
     done
-}
+else
+    idx=$((choice - 1))
+    if [ "$idx" -ge 0 ] 2>/dev/null && [ "$idx" -lt "${#fonts[@]}" ] 2>/dev/null; then
+        do_install_font "${fonts[$idx]}"
+    else
+        error "Invalid choice."
+        exit 1
+    fi
+fi
 
-install_required_tools $os_type
-# Demander à l'utilisateur de choisir une police
-echo "Choisissez une police à installer :"
-select font_choice in "${fonts[@]}"; do
-    case $font_choice in
-        *)
-            # Vérifier si la police est déjà installée
-            if [ -f "$font_dir/${font_choice}NerdFont.ttf" ]; then
-                echo "La police $font_choice est déjà installée."
-            else
-                install_font $font_choice
-            fi
-            break
-            ;;
-    esac
-done
+echo ""
+success "Font installation complete!"
+info "Select the installed font in your terminal emulator's settings."
+echo ""
