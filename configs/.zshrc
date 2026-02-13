@@ -26,6 +26,8 @@ plugins=(
     web-search
     copyfile
     copypath
+    npm
+    pip
 )
 
 source "$ZSH/oh-my-zsh.sh"

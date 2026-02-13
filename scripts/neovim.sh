@@ -137,7 +137,7 @@ install_lazyvim() {
     fi
 
     info "Cloning LazyVim starter template..."
-    git clone https://github.com/LazyVim/starter "$HOME/.config/nvim"
+    git clone --depth=1 https://github.com/LazyVim/starter "$HOME/.config/nvim"
     rm -rf "$HOME/.config/nvim/.git"
 
     info "Running headless plugin sync (this may take a moment)..."

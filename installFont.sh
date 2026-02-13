@@ -9,7 +9,7 @@
 #  Usage:  chmod +x installFont.sh && ./installFont.sh
 # ============================================================================
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/scripts/utils.sh"

@@ -111,6 +111,11 @@ cmd_exists() {
 
 ask_yes_no() {
     local prompt="$1"
+    # --all mode: auto-accept everything
+    if [ "${AUTO_YES:-false}" = true ]; then
+        echo -e "${BOLD}$prompt${NC} [Y/n] y (auto)"
+        return 0
+    fi
     local response
     echo -en "${BOLD}$prompt${NC} [Y/n] "
     read -r response

@@ -9,9 +9,23 @@
 #  Usage:
 #    git clone https://github.com/diveaire/MyTerminalKit.git
 #    cd MyTerminalKit && chmod +x install.sh && ./install.sh
+#
+#  Options:
+#    --all   Install every component without prompting.
 # ============================================================================
 
-set -euo pipefail
+set -uo pipefail
+
+# ── Parse arguments ─────────────────────────────────────────────────────────
+
+AUTO_YES=false
+for arg in "$@"; do
+    case "$arg" in
+        --all) AUTO_YES=true ;;
+        *)     echo "Unknown option: $arg"; exit 1 ;;
+    esac
+done
+export AUTO_YES
 
 # Resolve project root (works even when called via a symlink)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

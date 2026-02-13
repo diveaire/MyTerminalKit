@@ -77,7 +77,7 @@ install_zsh_plugins() {
         success "zsh-autosuggestions already installed."
     else
         info "Installing zsh-autosuggestions..."
-        git clone https://github.com/zsh-users/zsh-autosuggestions \
+        git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions \
             "$custom_dir/plugins/zsh-autosuggestions"
         success "zsh-autosuggestions installed."
     fi
@@ -87,7 +87,7 @@ install_zsh_plugins() {
         success "zsh-syntax-highlighting already installed."
     else
         info "Installing zsh-syntax-highlighting..."
-        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
+        git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git \
             "$custom_dir/plugins/zsh-syntax-highlighting"
         success "zsh-syntax-highlighting installed."
     fi
@@ -129,11 +129,23 @@ set_default_shell_zsh() {
         return
     fi
 
+    local zsh_path
+    zsh_path="$(which zsh 2>/dev/null || true)"
+
+    if [ -z "$zsh_path" ]; then
+        warn "Zsh not found in PATH. Cannot set as default shell."
+        return
+    fi
+
+    # Ensure zsh is listed in /etc/shells (required by chsh on most systems)
+    if [ -f /etc/shells ] && ! grep -qx "$zsh_path" /etc/shells; then
+        info "Adding $zsh_path to /etc/shells..."
+        echo "$zsh_path" | $SUDO tee -a /etc/shells >/dev/null
+    fi
+
     if ask_yes_no "Set Zsh as your default shell?"; then
-        local zsh_path
-        zsh_path="$(which zsh)"
         info "Changing default shell to $zsh_path..."
-        if chsh -s "$zsh_path" 2>/dev/null; then
+        if $SUDO chsh -s "$zsh_path" "$(whoami)" 2>/dev/null; then
             success "Default shell changed to Zsh."
         else
             warn "Could not change shell automatically. Run manually: chsh -s $zsh_path"
