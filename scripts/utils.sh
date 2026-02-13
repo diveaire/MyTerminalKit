@@ -19,6 +19,18 @@ warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 header()  { echo -e "\n${BOLD}${CYAN}━━━ $1 ━━━${NC}\n"; }
 
+# ── Sudo handling ───────────────────────────────────────────────────────────
+# Use sudo only when not already root and when sudo is available.
+if [ "$(id -u)" -eq 0 ]; then
+    SUDO=""
+elif command -v sudo &>/dev/null; then
+    SUDO="sudo"
+else
+    SUDO=""
+    warn "Not running as root and sudo is not installed. Some installs may fail."
+fi
+export SUDO
+
 # ── OS & Package Manager Detection ──────────────────────────────────────────
 
 detect_os() {
@@ -68,12 +80,12 @@ detect_os() {
 pkg_update() {
     info "Updating package index..."
     case "$PKG_MANAGER" in
-        apt)    sudo apt-get update -qq ;;
-        dnf)    sudo dnf check-update -q 2>/dev/null; true ;;
-        yum)    sudo yum check-update -q 2>/dev/null; true ;;
-        pacman) sudo pacman -Sy --noconfirm >/dev/null ;;
-        zypper) sudo zypper refresh -q ;;
-        apk)    sudo apk update -q ;;
+        apt)    $SUDO apt-get update -qq ;;
+        dnf)    $SUDO dnf check-update -q 2>/dev/null; true ;;
+        yum)    $SUDO yum check-update -q 2>/dev/null; true ;;
+        pacman) $SUDO pacman -Sy --noconfirm >/dev/null ;;
+        zypper) $SUDO zypper refresh -q ;;
+        apk)    $SUDO apk update -q ;;
         brew)   brew update --quiet ;;
     esac
 }
@@ -81,12 +93,12 @@ pkg_update() {
 pkg_install() {
     local pkg="$1"
     case "$PKG_MANAGER" in
-        apt)    sudo apt-get install -y -qq "$pkg" ;;
-        dnf)    sudo dnf install -y -q "$pkg" ;;
-        yum)    sudo yum install -y -q "$pkg" ;;
-        pacman) sudo pacman -S --noconfirm --needed "$pkg" ;;
-        zypper) sudo zypper install -y "$pkg" ;;
-        apk)    sudo apk add -q "$pkg" ;;
+        apt)    $SUDO apt-get install -y -qq "$pkg" ;;
+        dnf)    $SUDO dnf install -y -q "$pkg" ;;
+        yum)    $SUDO yum install -y -q "$pkg" ;;
+        pacman) $SUDO pacman -S --noconfirm --needed "$pkg" ;;
+        zypper) $SUDO zypper install -y "$pkg" ;;
+        apk)    $SUDO apk add -q "$pkg" ;;
         brew)   brew install --quiet "$pkg" ;;
     esac
 }

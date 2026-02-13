@@ -88,7 +88,7 @@ install_colorls() {
     esac
 
     info "Installing colorls via gem..."
-    if sudo gem install colorls 2>/dev/null; then
+    if $SUDO gem install colorls 2>/dev/null; then
         success "colorls installed."
     elif gem install colorls --user-install 2>/dev/null; then
         success "colorls installed (user-level)."
